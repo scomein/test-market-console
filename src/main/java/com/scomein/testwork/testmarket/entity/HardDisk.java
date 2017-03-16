@@ -3,7 +3,6 @@ package com.scomein.testwork.testmarket.entity;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,7 +14,7 @@ import java.util.List;
 public class HardDisk extends Product {
 
     @Column
-    private double size;
+    private Double size;
 
     enum FIELD_NAMES {
         size {
@@ -50,5 +49,14 @@ public class HardDisk extends Product {
 
         field.setValue(this, fieldValue);
         return true;
+    }
+
+    @Override
+    public List<String> parseToRow() {
+        List<String> data = super.parseToRow();
+        if (size != null) {
+            data.add(FIELD_NAMES.size + ":" + size);
+        }
+        return data;
     }
 }

@@ -14,7 +14,7 @@ import java.util.List;
 public class Laptop extends Product {
 
     @Column
-    private float diagonal;
+    private Float diagonal;
 
     enum FIELD_NAMES {
         diagonal {
@@ -49,5 +49,14 @@ public class Laptop extends Product {
 
         field.setValue(this, fieldValue);
         return true;
+    }
+
+    @Override
+    public List<String> parseToRow() {
+        List<String> data = super.parseToRow();
+        if (diagonal != null) {
+            data.add(FIELD_NAMES.diagonal + ":" + diagonal);
+        }
+        return data;
     }
 }

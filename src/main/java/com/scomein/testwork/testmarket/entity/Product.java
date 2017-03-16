@@ -4,8 +4,11 @@ package com.scomein.testwork.testmarket.entity;
  * Created by scome on 15.03.17.
  */
 
+import com.scomein.testwork.testmarket.csv.ProductType;
+
 import javax.persistence.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -20,10 +23,13 @@ public class Product {
     private String producer;
 
     @Column
-    private double price;
+    private Double price;
 
     @Column
-    private int count;
+    private Integer count;
+
+    protected ProductType type;
+
 
     public enum FIELD_NAMES {
         serialnumber {
@@ -85,5 +91,21 @@ public class Product {
 
         FIELD_NAMES.valueOf(fieldName).setValue(this, fieldValue);
         return true;
+    }
+
+    public List<String> parseToRow() {
+        List<String> data = new LinkedList<>();
+        data.add(type.name());
+        data.add(count + "");
+        addIfNeed(data, FIELD_NAMES.producer, producer);
+        addIfNeed(data, FIELD_NAMES.serialnumber, serialNumber);
+        addIfNeed(data, FIELD_NAMES.price, price);
+        return data;
+    }
+
+    protected void addIfNeed(List<String> data, FIELD_NAMES field, Object value) {
+        if (value != null) {
+            data.add(field.name() + ":" + value);
+        }
     }
 }

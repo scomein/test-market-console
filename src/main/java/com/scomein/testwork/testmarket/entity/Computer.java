@@ -63,4 +63,10 @@ public class Computer extends Product {
         return true;
     }
 
+    @Override
+    public List<String> parseToRow() {
+        List<String> data = super.parseToRow();
+        data.add(FIELD_NAMES.formfactor.name() + ":" + formFactor.name());
+        return data;
+    }
 }
