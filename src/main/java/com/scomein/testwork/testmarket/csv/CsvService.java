@@ -62,12 +62,13 @@ public class CsvService {
     protected Product fill(Product product, String[] data) {
         product.setCount(Integer.valueOf(data[COLUMN_COUNT]));
         for (int i = COLUMN_COUNT + 1; i < data.length; i++) {
-            if (i + 1 == data.length) {
+            int index = data[i].indexOf(":");
+            if (index < 0 || index == data[i].length() - 1) {
                 //log this
-                break;
+                continue;
             }
 
-            if (!product.fillField(data[i++], data[i])) {
+            if (!product.fillField(data[i].substring(0, index), data[i].substring(index + 1))) {
                 //log this
             }
         }
