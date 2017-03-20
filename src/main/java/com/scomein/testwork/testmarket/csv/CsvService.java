@@ -2,12 +2,13 @@ package com.scomein.testwork.testmarket.csv;
 
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
+import com.scomein.testwork.testmarket.Dao.ProductDao;
 import com.scomein.testwork.testmarket.entity.*;
 import com.sun.istack.internal.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,6 +23,9 @@ public class CsvService {
 
     public static final char SEPARATOR = ';';
     public static final int PART_SIZE = 50;
+
+    @Autowired
+    private ProductDao dbService;
 
     public void importFile(String fileName) {
         try {
@@ -76,7 +80,7 @@ public class CsvService {
     }
 
     protected void save(Product product) {
-        // TODO: 16.03.17 realize saving after creating DBService
+        dbService.save(product);
     }
 
     public void exportFile(String fileName) {
@@ -96,8 +100,6 @@ public class CsvService {
     }
 
     protected List<Product> getPart(int partSize) {
-        // TODO: 16.03.17 realize getting objects from db after creating DBService
-
-        return new ArrayList<>();
+        return dbService.findAll(partSize);
     }
 }

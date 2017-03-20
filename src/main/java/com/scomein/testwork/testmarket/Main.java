@@ -2,8 +2,10 @@ package com.scomein.testwork.testmarket;
 
 import com.scomein.testwork.testmarket.csv.CsvService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
@@ -13,6 +15,8 @@ import java.util.StringJoiner;
  * Created by scome on 16.03.17.
  */
 @Component
+@Configuration
+@EntityScan(basePackages = {"com.scomein.testwork.entity"})
 @ComponentScan(basePackages = {"com.scomein.testwork.testmarket"})
 public class Main {
 

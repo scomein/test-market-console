@@ -7,12 +7,15 @@ package com.scomein.testwork.testmarket.entity;
 import com.scomein.testwork.testmarket.csv.ProductType;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 @Entity
 @Table(name = "product")
+@NamedQueries(
+        @NamedQuery(name = "getAll",
+                query = "from Product")
+)
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Product {
 
