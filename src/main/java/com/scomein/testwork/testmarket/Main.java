@@ -1,9 +1,12 @@
 package com.scomein.testwork.testmarket;
 
 import com.scomein.testwork.testmarket.csv.CsvService;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
@@ -28,6 +31,11 @@ public class Main {
 
     @Autowired
     private CsvService csvService;
+
+    @Bean
+    SessionFactory sessionFactory() {
+        return new org.hibernate.cfg.Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
+    }
 
     public static void main(String[] args) {
         AnnotationConfigApplicationContext ctx =

@@ -5,6 +5,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 import com.scomein.testwork.testmarket.Dao.ProductDao;
 import com.scomein.testwork.testmarket.entity.*;
 import com.sun.istack.internal.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ public class CsvService {
     public static final char SEPARATOR = ';';
     public static final int PART_SIZE = 50;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvService.class);
+
     @Autowired
     private ProductDao dbService;
 
@@ -35,11 +39,10 @@ public class CsvService {
                 createAndSave(ProductType.valueOf(row[COLUMN_PRODUCT_TYPE].toLowerCase()), row);
             }
         } catch (FileNotFoundException e) {
-            //log this
-            e.printStackTrace();
+            LOGGER.error("File " + fileName + " not found!");
         } catch (IOException e) {
-            //log this
-            e.printStackTrace();
+            LOGGER.error("Some exception occured while parsing file " + fileName +
+                    ". Exception: " + e.getMessage());
         }
     }
 
@@ -65,14 +68,23 @@ public class CsvService {
     protected Product fill(Product product, String[] data) {
         product.setCount(Integer.valueOf(data[COLUMN_COUNT]));
         for (int i = COLUMN_COUNT + 1; i < data.length; i++) {
-            int index = data[i].indexOf(":");
-            if (index < 0 || index == data[i].length() - 1) {
-                //log this
+            String value = data[i];
+            int index = value.indexOf(":");
+            if (index < 0 || index == value.length() - 1) {
+                LOGGER.warn("Problem in file: parameter "
+                        + value
+                        + "hasn't symbol ':' and will not be parsed");
                 continue;
             }
 
-            if (!product.fillField(data[i].substring(0, index), data[i].substring(index + 1))) {
-                //log this
+            String fieldName = value.substring(0, index);
+            String fieldValue = value.substring(index + 1);
+
+            if (!product.fillField(fieldName, fieldValue)) {
+                LOGGER.warn("Problem in file: can't fill parameter "
+                        + fieldName
+                        + "(value: " + fieldValue + ")");
+
             }
         }
 
@@ -94,7 +106,7 @@ public class CsvService {
             }
 
         } catch (IOException e) {
-            //log this
+            LOGGER.error("Some exception occured while import data: " + e.getMessage());
             e.printStackTrace();
         }
     }
