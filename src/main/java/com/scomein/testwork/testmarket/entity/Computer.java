@@ -1,8 +1,13 @@
 package com.scomein.testwork.testmarket.entity;
 
+import com.scomein.testwork.testmarket.csv.ProductType;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +40,9 @@ public class Computer extends Product {
         abstract void setValue(Computer product, String value);
     }
 
+    public Computer() {
+        type = ProductType.computer;
+    }
 
     @Column
     private FormFactor formFactor;
@@ -54,19 +62,32 @@ public class Computer extends Product {
             return true;
         }
 
-        FIELD_NAMES field = FIELD_NAMES.valueOf(fieldName);
-        if (field == null) {
-            return false;
+        for (FIELD_NAMES name : FIELD_NAMES.values()) {
+            if (name.name().equals(fieldName)) {
+                FIELD_NAMES.valueOf(fieldName).setValue(this, fieldValue);
+                return true;
+            }
         }
-
-        field.setValue(this, fieldValue);
-        return true;
+        return false;
     }
 
     @Override
     public List<String> parseToRow() {
         List<String> data = super.parseToRow();
-        data.add(FIELD_NAMES.formfactor.name() + ":" + formFactor.name());
+        if (formFactor != null) {
+            data.add(FIELD_NAMES.formfactor.name() + ":" + formFactor.name());
+        }
         return data;
+    }
+
+    @Override
+    public CriteriaQuery<Computer> getQuery(CriteriaBuilder builder) {
+        CriteriaQuery<Computer> criteriaQuery = builder.createQuery(Computer.class);
+        Root<Computer> root = criteriaQuery.from(Computer.class);
+        criteriaQuery.select(root);
+        criteriaQuery.where(Product.build(this, builder, root),
+                builder.equal(root.get("formFactor"), formFactor));
+
+        return criteriaQuery;
     }
 }

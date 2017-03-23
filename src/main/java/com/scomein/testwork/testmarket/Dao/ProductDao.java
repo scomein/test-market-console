@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.transaction.Transactional;
 import java.util.List;
 
@@ -46,11 +47,29 @@ public class ProductDao {
     public void save(Product product) {
         Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
         try {
-            sessionFactory.getCurrentSession().save(product);
+            Product fromDb = findEquals(product);
+            if (fromDb == null) {
+                sessionFactory.getCurrentSession().save(product);
+            } else {
+                fromDb.setCount(fromDb.getCount() + product.getCount());
+                sessionFactory.getCurrentSession().save(fromDb);
+            }
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
             LOGGER.error("Some error occured while saving data to database:" + e.getMessage());
         }
     }
+
+    @Transactional
+    private Product findEquals(Product product) {
+        try {
+            return sessionFactory.getCurrentSession()
+                    .createQuery(product.getQuery(sessionFactory.getCriteriaBuilder()))
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

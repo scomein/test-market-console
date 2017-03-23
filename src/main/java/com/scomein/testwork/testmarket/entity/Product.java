@@ -7,6 +7,8 @@ package com.scomein.testwork.testmarket.entity;
 import com.scomein.testwork.testmarket.csv.ProductType;
 
 import javax.persistence.*;
+import javax.persistence.criteria.*;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +19,11 @@ import java.util.List;
                 query = "from Product")
 )
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Product {
+public abstract class Product {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column
     private String serialNumber;
@@ -32,6 +38,14 @@ public class Product {
     private Integer count;
 
     protected ProductType type;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 
     public enum FIELD_NAMES {
@@ -71,7 +85,7 @@ public class Product {
         this.producer = producer;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
@@ -88,12 +102,13 @@ public class Product {
     }
 
     public boolean fillField(String fieldName, String fieldValue) {
-        if (FIELD_NAMES.valueOf(fieldName) == null) {
-            return false;
+        for (FIELD_NAMES name : FIELD_NAMES.values()) {
+            if (name.name().equals(fieldName)) {
+                FIELD_NAMES.valueOf(fieldName).setValue(this, fieldValue);
+                return true;
+            }
         }
-
-        FIELD_NAMES.valueOf(fieldName).setValue(this, fieldValue);
-        return true;
+        return false;
     }
 
     public List<String> parseToRow() {
@@ -111,4 +126,29 @@ public class Product {
             data.add(field.name() + ":" + value);
         }
     }
+
+    public abstract <T extends Product> CriteriaQuery<T> getQuery(CriteriaBuilder builder);
+
+    public static <T extends Product> Predicate build(Product product, CriteriaBuilder builder, Root<T> root) {
+        List<Predicate> predicates = Arrays.asList(
+                andIfNotNull(builder, root.get("serialNumber"), product.getSerialNumber()),
+                andIfNotNull(builder, root.get("producer"), product.getProducer()),
+                andIfNotNull(builder, root.get("price"), product.getPrice()));
+        Predicate predicate = builder.and();
+        for (Predicate pr : predicates) {
+            if (pr != null) {
+                predicate = builder.and(predicate, pr);
+            }
+        }
+        return predicate;
+    }
+
+    public static Predicate andIfNotNull(CriteriaBuilder builder, Expression expression, Object val) {
+        if (val == null) {
+            return null;
+        }
+        return builder.equal(expression, val);
+    }
+
+
 }
